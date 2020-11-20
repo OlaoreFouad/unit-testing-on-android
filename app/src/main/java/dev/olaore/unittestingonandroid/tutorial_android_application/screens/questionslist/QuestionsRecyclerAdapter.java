@@ -1,8 +1,7 @@
 package dev.olaore.unittestingonandroid.tutorial_android_application.screens.questionslist;
 
-
-
 import android.view.ViewGroup;
+
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;

@@ -18,6 +18,7 @@ import dev.olaore.unittestingonandroid.tutorial_android_application.screens.comm
 import dev.olaore.unittestingonandroid.tutorial_android_application.screens.common.navdrawer.NavDrawerHelper;
 import dev.olaore.unittestingonandroid.tutorial_android_application.screens.common.screensnavigator.ScreensNavigator;
 import dev.olaore.unittestingonandroid.tutorial_android_application.screens.common.toastshelper.ToastsHelper;
+import dev.olaore.unittestingonandroid.tutorial_android_application.screens.questiondetails.QuestionDetailsController;
 import dev.olaore.unittestingonandroid.tutorial_android_application.screens.questionslist.QuestionsListController;
 
 public class ControllerCompositionRoot {
@@ -100,5 +101,9 @@ public class ControllerCompositionRoot {
 
     public BackPressDispatcher getBackPressDispatcher() {
         return (BackPressDispatcher) getActivity();
+    }
+
+    public QuestionDetailsController getQuestionDetailsController() {
+        return new QuestionDetailsController(getFetchQuestionDetailsUseCase(), getScreensNavigator(), getToastsHelper());
     }
 }

@@ -1,6 +1,5 @@
 package dev.olaore.unittestingonandroid.tutorial_android_application.screens.questiondetails;
 
-
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;

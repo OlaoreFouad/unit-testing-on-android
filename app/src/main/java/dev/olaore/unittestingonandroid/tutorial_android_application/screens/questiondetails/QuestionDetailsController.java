@@ -6,7 +6,7 @@ import dev.olaore.unittestingonandroid.tutorial_android_application.questions.Qu
 import dev.olaore.unittestingonandroid.tutorial_android_application.screens.common.screensnavigator.ScreensNavigator;
 import dev.olaore.unittestingonandroid.tutorial_android_application.screens.common.toastshelper.ToastsHelper;
 
-public class QuestionDetailsController implements QuestionDetailsViewMvc.Listener, FetchQuestionDetailsUseCase.Listener {
+public class QuestionDetailsController implements FetchQuestionDetailsUseCase.Listener, QuestionDetailsViewMvc.Listener {
 
     private final FetchQuestionDetailsUseCase mFetchQuestionDetailsUseCase;
     private final ScreensNavigator mScreensNavigator;
@@ -27,38 +27,27 @@ public class QuestionDetailsController implements QuestionDetailsViewMvc.Listene
         mQuestionId = questionId;
     }
 
-    public void bindView(QuestionDetailsViewMvc viewMvc) {
-        mViewMvc = viewMvc;
-    }
-
     public void onStart() {
-        mViewMvc.registerListener(this);
         mFetchQuestionDetailsUseCase.registerListener(this);
-
-        mViewMvc.showProgressIndication();
-        mFetchQuestionDetailsUseCase.fetchQuestionDetailsAndNotify(mQuestionId);
-    }
-
-    public void onStop() {
-        mViewMvc.unregisterListener(this);
-        mFetchQuestionDetailsUseCase.unregisterListener(this);
-    }
-
-    @Override
-    public void onQuestionDetailsFetched(QuestionDetails questionDetails) {
-        mViewMvc.bindQuestion(questionDetails);
-        mViewMvc.hideProgressIndication();
-    }
-
-    @Override
-    public void onQuestionDetailsFetchFailed() {
-        mViewMvc.hideProgressIndication();
-        mToastsHelper.showUseCaseError();
+        mViewMvc.registerListener(this);
     }
 
     @Override
     public void onNavigateUpClicked() {
-        mScreensNavigator.navigateUp();
+
     }
 
+    @Override
+    public void onQuestionDetailsFetched(QuestionDetails questionDetails) {
+
+    }
+
+    @Override
+    public void onQuestionDetailsFetchFailed() {
+
+    }
+
+    public void bindView(QuestionDetailsViewMvc viewMvc) {
+        mViewMvc = viewMvc;
+    }
 }
