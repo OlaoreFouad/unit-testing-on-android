@@ -30,24 +30,34 @@ public class QuestionDetailsController implements FetchQuestionDetailsUseCase.Li
     public void onStart() {
         mFetchQuestionDetailsUseCase.registerListener(this);
         mViewMvc.registerListener(this);
+
+        mViewMvc.showProgressIndication();
+        mFetchQuestionDetailsUseCase.fetchQuestionDetailsAndNotify(mQuestionId);
     }
 
     @Override
     public void onNavigateUpClicked() {
-
+        mScreensNavigator.navigateUp();
     }
 
     @Override
     public void onQuestionDetailsFetched(QuestionDetails questionDetails) {
-
+        mViewMvc.hideProgressIndication();
+        mViewMvc.bindQuestion(questionDetails);
     }
 
     @Override
     public void onQuestionDetailsFetchFailed() {
-
+        mViewMvc.hideProgressIndication();
+        mToastsHelper.showUseCaseError();
     }
 
     public void bindView(QuestionDetailsViewMvc viewMvc) {
         mViewMvc = viewMvc;
+    }
+
+    public void onStop() {
+        mViewMvc.unregisterListener(this);
+        mFetchQuestionDetailsUseCase.unregisterListener(this);
     }
 }
