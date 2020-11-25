@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
+import dev.olaore.unittestingonandroid.tutorial_android_application.common.time.TimeProvider;
 import dev.olaore.unittestingonandroid.tutorial_android_application.networking.StackoverflowApi;
 import dev.olaore.unittestingonandroid.tutorial_android_application.networking.questions.FetchLastActiveQuestionsEndpoint;
 import dev.olaore.unittestingonandroid.tutorial_android_application.networking.questions.FetchQuestionDetailsEndpoint;
@@ -68,7 +69,11 @@ public class ControllerCompositionRoot {
     }
 
     public FetchQuestionDetailsUseCase getFetchQuestionDetailsUseCase() {
-        return new FetchQuestionDetailsUseCase(getFetchQuestionDetailsEndpoint());
+        return new FetchQuestionDetailsUseCase(getFetchQuestionDetailsEndpoint(), getTimeProvider());
+    }
+
+    public TimeProvider getTimeProvider() {
+        return new TimeProvider();
     }
 
     public FetchLastActiveQuestionsUseCase getFetchLastActiveQuestionsUseCase() {

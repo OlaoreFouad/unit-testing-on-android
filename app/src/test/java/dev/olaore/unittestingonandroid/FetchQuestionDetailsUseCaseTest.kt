@@ -31,7 +31,7 @@ class FetchQuestionDetailsUseCaseTest {
     @Before
     fun setup() {
         endpointTd = EndpointTd()
-        systemUnderTest = FetchQuestionDetailsUseCase(endpointTd)
+        systemUnderTest = FetchQuestionDetailsUseCase(endpointTd, null)
 
         listener1 = mock()
         listener2 = mock()

@@ -1,9 +1,10 @@
 package dev.olaore.unittestingonandroid.tutorial_android_application
 
-import com.nhaarman.mockitokotlin2.argThat
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.*
+import dev.olaore.unittestingonandroid.QUESTION_ID
+import dev.olaore.unittestingonandroid.tutorial_android_application.common.time.TimeProvider
 import dev.olaore.unittestingonandroid.tutorial_android_application.questions.FetchQuestionDetailsUseCase
+import dev.olaore.unittestingonandroid.tutorial_android_application.questions.QuestionDetails
 import dev.olaore.unittestingonandroid.tutorial_android_application.screens.common.screensnavigator.ScreensNavigator
 import dev.olaore.unittestingonandroid.tutorial_android_application.screens.common.toastshelper.ToastsHelper
 import dev.olaore.unittestingonandroid.tutorial_android_application.screens.questiondetails.QuestionDetailsController
@@ -21,6 +22,7 @@ class QuestionDetailsControllerTest {
     // region helper fields
 
     lateinit var screensNavigator: ScreensNavigator
+    lateinit var timeProvider: TimeProvider
     lateinit var toastsHelper: ToastsHelper
     lateinit var useCaseTd: UseCaseTd
     lateinit var questionDetailsViewMvc: QuestionDetailsViewMvc
@@ -33,8 +35,9 @@ class QuestionDetailsControllerTest {
 
         screensNavigator = mock()
         toastsHelper = mock()
+        timeProvider = mock()
         questionDetailsViewMvc = mock()
-        useCaseTd = UseCaseTd()
+        useCaseTd = UseCaseTd(timeProvider)
 
         systemUnderTest = QuestionDetailsController(useCaseTd, screensNavigator, toastsHelper)
         systemUnderTest.bindView(questionDetailsViewMvc)
@@ -42,13 +45,6 @@ class QuestionDetailsControllerTest {
     }
 
     // region test cases
-
-    // 1. onStart of the fragment, initialize the controller, register required listeners
-    // 2. onStart of the fragment, make the request to get question details and showProgressIndication
-    // 3. onStop of the fragment, unregister the listeners
-    // 4. on successful question details fetched, hide progress indication and bind questions to view, also notify listeners
-    // 5. on failure response, hide progress indication, show toast error, and notify listeners
-    // 6. onNavigateUp clicked, screen navigator should navigate up
 
     // 1. onStart of the fragment, initialize the controller, register required listeners
     // 2. onStart of the fragment, make the request to get question details and showProgressIndication
@@ -116,6 +112,34 @@ class QuestionDetailsControllerTest {
         verify(screensNavigator).navigateUp()
     }
 
+    // 6b. test when call is made to usecase for first time, data is cached
+
+
+
+    // 7. test when call is made to the usecase for data and cache timeout is still in session (less than), return cached data
+    @Test
+    fun test_whenCallIsMade_forData_andTimeoutHasntElapsed_shouldReturnCachedData() {
+//        arrange
+        val questionDetails = Util.getQuestionDetails(QUESTION_ID)
+        whenever(timeProvider.currentTimestamp)
+            .thenReturn(0L)
+//        act
+        systemUnderTest.onStart()
+        systemUnderTest.onStop()
+        whenever(timeProvider.currentTimestamp).thenReturn(60000L)
+        systemUnderTest.onStart()
+
+//        assert
+        verify(questionDetailsViewMvc, times(2)).bindQuestion(
+            argThat { id == questionDetails.id && title == questionDetails.title && body == questionDetails.body }
+        )
+    }
+
+
+
+    // 8. test when call is made to the usecase for data and cache timeout is elapsed, make call to network
+
+
     // endregion test cases
 
     // region helper methods
@@ -128,19 +152,33 @@ class QuestionDetailsControllerTest {
 
 }
 
-class UseCaseTd : FetchQuestionDetailsUseCase(null) {
+class UseCaseTd(private val timeProvider: TimeProvider) : FetchQuestionDetailsUseCase(null, timeProvider) {
 
     var failureMode = false
+    private val CACHE_TIMEOUT_MS = 60000
+    var lastQuestionId = ""
+    var lastCachedTime = 0L
+    var mQuestionDetails: QuestionDetails? = null
 
     override fun fetchQuestionDetailsAndNotify(questionId: String?) {
 
-        listeners.forEach { listener ->
-            if (!failureMode) {
-                listener.onQuestionDetailsFetched(
-                    Util.getQuestionDetails(Util.questionId)
-                )
-            } else {
-                listener.onQuestionDetailsFetchFailed()
+        if (questionId == lastQuestionId && timeProvider.currentTimestamp < (lastCachedTime + CACHE_TIMEOUT_MS)) {
+            listeners.forEach { listener ->
+                if (!failureMode) {
+                    listener.onQuestionDetailsFetched(mQuestionDetails)
+                } else {
+                    listener.onQuestionDetailsFetchFailed()
+                }
+            }
+        } else {
+            mQuestionDetails = Util.getQuestionDetails(questionId!!)
+            lastQuestionId = questionId
+            listeners.forEach { listener ->
+                if (!failureMode) {
+                    listener.onQuestionDetailsFetched(mQuestionDetails)
+                } else {
+                    listener.onQuestionDetailsFetchFailed()
+                }
             }
         }
     }
